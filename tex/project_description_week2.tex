@@ -1,0 +1,265 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\newcommand{\parta}{\emph{a)\,}}
+\newcommand{\partb}{\emph{b)\,}}
+\newcommand{\partc}{\emph{c)\,}}
+\newcommand{\partd}{\emph{d)\,}}
+\newcommand{\parte}{\emph{e)\,}}
+\newcommand{\partf}{\emph{f)\,}}
+\newcommand{\partg}{\emph{g)\,\,\,}}
+\newcommand{\m}{\mathrm}
+\newcommand{\ddx}{\frac{\mathrm{d}}{\mathrm{dx}}}
+\newcommand{\dydx}{\frac{\mathrm{d}y}{\mathrm{d}x}}
+\newcommand{\dydydxdx}{\frac{\mathrm{d}^2y}{\mathrm{d}x^2}}
+\newcommand{\ddt}{\frac{\mathrm{d}}{\mathrm{dt}}}
+\newcommand{\fx}{\m{f}(x)}
+\newcommand{\gx}{\m{g}(x)}
+\newcommand{\hx}{\m{h}(x)}
+\newcommand{\dx}{\m{d}x}
+\newcommand{\fy}{\m{f}(y)}
+\newcommand{\gy}{\m{g}(y)}
+\newcommand{\hy}{\m{h}(y)}
+\newcommand{\dy}{\m{d}y}
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+\usepackage{natbib}
+
+\usepackage{amsmath,amssymb}
+
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+\normalfont \normalsize 
+\textsc{Aalborg Uni. python course, summer 2015} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Mini-project: optimizing Mandelbrot set estimation\\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Daniel Lawther (unclellama@gmail.com)} % Your name
+
+%\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+
+\section{The Mandelbrot set}
+
+The Mandelbrot set is a set of complex numbers. For a given number $c$, membership of the set is decided by first running the following iterative procedure:
+
+\begin{equation}\label{eq:mandelbrot_step}
+z_{n+1}=z_n^2+c\,\,\,;z_0=0
+\end{equation}
+
+...where $z_n$ in general will take complex values for some or all values of $n$, and the complex square $z_n^2$ is defined as the product of $z$ and its complex conjugate in the usual way. Membership of the Mandelbrot set is then assigned to complex numbers $c$ for which the magnitude of $z_n$ remains bounded for all $n$.\\
+
+For example: due to the term $z_n^2$ on the right hand side of Equation \ref{eq:mandelbrot_step}, the algorithm grows without bound if, for any $n$, the absolute value of $z_n$ is larger than 2. Thus, we can establish that any number $c$ for which the algorithm produces $|z_n|>2$ for any given $n$ is \emph{not} part of the Mandelbrot set. Showing that a given $c$ \emph{is} part of the Mandelbrot set is more tricky; certainly $c=0$ is part of the Mandelbrot set, and any $c$ with $|c|\ge2$ is excluded from the set due to the previous argument, but I have no idea how one would go about proving membership of the set for an arbitrary $c$. The problem is, of course, that the set is defined using an algorithm that must be run an infinite number of times to ensure set membership for a given $c$. \\
+
+In this mini-project I will tackle the much easier problem of deciding, for a grid of complex numbers $c$, which of them are \emph{definitely not} members of the Mandelbrot set, i.e., which $c$ cause $|z_n|>2$ for some value of $n$ if I run the algorithm up to some finite $N_\mathrm{max}$. The complement of \emph{that} set must then contain all of those $c$ in my grid that are members of the Mandelbrot set, along with all non-members for which it takes more iterations of the algorithm than $N_{\mathrm{max}}$ for them to begin to diverge. Increasing the threshold $N_\mathrm{max}$ will catch more of these `impostors', yielding a better approximation of the Mandelbrot set itself.\\
+
+I will work with a discrete grid of complex numbers, which means that the `Mandelbrot-ish' set I obtain will be discrete. However, as the Mandelbrot set itself is simply connected\footnote{See, e.g., \url{http://www.math.harvard.edu/archive/118r_spring_05/handouts/mandelbrot.pdf}}, we can expect to generate something that gives us a good idea of what the true Mandelbrot set looks like, as long as our grid has a reasonably high resolution. For non-members of the Mandelbrot set, the number of iterations required to `break out' grows smoothly as we move in from $|c|>2$ towards the boundary of the set. One can produce pretty pictures by color-coding each non-member by the number of iterations, so that is what I'm going to do in terms of visualization, as suggested in the project description.\\
+
+The main theme of this mini-project is optimization strategies for Python code. I therefore started this work by writing a naive implementation of the algorithm that loops over every pixel in the grid of complex numbers $c$, and breaks out of the loop if $|z_n|\ge2$ or $n=N_\mathrm{max}$. This code is slow! It is, however, the conceptually simplest implementation I could come up with, which makes it an ideal starting point. This implementation is described in § \ref{sec:naive}.\\
+
+As soon as the naive implementation was `ready', in the sense that it passed the unittests I had written for it and that it could produce a plot that resembled the Mandelbrot set upon visual inspection, I replaced the `looping over each pixel' part with a NumPy vectorized implementation that produced identical output for a given $N_\mathrm{max}$. This implementation is described in § \ref{sec:numpy}.\\ 
+
+An important aspect of optimizing code is to profile it: without this step, one risks wasting a lot of time optimizing a block of code that is not worth optimizing! I describe how I profiled the code in § \ref{sec:profiling}. Based on this profiling I was able to identify which parts of the NumPy implementation were slowing down the calculation; I optimized some of the offending parts of the code, resulting in a somewhat faster alternative NumPy implementation (§ \ref{sec:numpy2}).\\
+
+The last optimization strategy I tried was a multithreaded approach as described in § \ref{sec:multithread}.\\ 
+
+All code can be found in the Python script \emph{almondbread.py}; unittests can be found in \emph{almondbread\_test.py}. To time each of the above implementations, one after the other, run \emph{almondbread.py} in Python (e.g., \emph{python mandelbrot.py} from a Linux or OS X terminal).
+
+\section{Naive loop-within-loop implementation}\label{sec:naive}
+
+The naive interpretation of the Mandelbrot algorithm is comprised of the following functions:\\ 
+
+\emph{setup\_complex\_arr()} creates a grid $C$ of complex numbers $c_i$. It takes as inputs two 1D np.arrays, which are used as the real and imaginary parts in a grid over the complex plane, which the function returns.\\
+
+\emph{mandelcheck()} takes $N_\mathrm{max}$ and a single complex number $c$ as inputs, evaluates $z_{n+1}$ iteratively as per Equation \ref{eq:mandelbrot_step}, and checks whether $|z_n|>2$ for $n<N_\mathrm{max}$. It outputs the number of iterations it takes for $|z_n|\ge2$; if the inequality is not fulfilled before $n=N_\mathrm{max}$, it outputs $N_\mathrm{max}$. This part of the code depends on the output of step $n$ to calculate step $n+1$, and is therefore difficult to vectorize: for a given $c$, the calculation must be done sequentially.\\
+
+\emph{almondbread()} loops over each pixel in the array $C$, and calls \emph{mandelcheck()} for each $c_i$. The output of \emph{mandelcheck()} is recorded in the array produced by \emph{setup\_mesh()}.\\
+
+\emph{show\_image()} produces a plot of the number of iterations it takes for $|z_n|\ge2$ for each sampled point on the complex plane. The brightest area of this plot (at iterations=$N_\mathrm{max}$) corresponds to points that did not diverge, and thus is an approximation to the Mandelbrot set.
+
+\subsection{Testing the algorithm}
+
+I tested this implementation in two ways. Firstly, certain points $c$ should, by inspection of the algorithm \ref{eq:mandelbrot_step}, yield cyclical values of $x_n$. Examples of these are $c=0+0i$, which yields $x_n=0$ for all $n$, and any points on the real line between $c=-2+0i$ and $c=0.25+0i$. These points should not diverge, no matter how high we set the threshold $N_\mathrm{max}$. I wrote unittests to check that these points do not diverge. Secondly, I plotted the approximation to the set as a PDF file, and ensured that it visually resembles similar figures produced by other implementations.
+
+\section{Vectorized implementation with NumPy}\label{sec:numpy}
+
+For each pixel in the grid of complex numbers $c$, we can determine whether $z_n$ diverges independently of the behavior of any other values of $c$. This means that we can vectorize the section of the code that loops over $c$ in the naive implementation.\\
+
+The only difference compared to the previous implementation is that it calls the function \emph{mandelcheck\_vector()}, which loops over iterations $n$, but performs each iteration simultaneously on all points $c$ of the complex grid produced by \emph{setup\_complex\_arr}. This implementation is called by setting the keyword \emph{imp="numpy"} in the call to \emph{almondbread()}.\\ 
+
+Note that this implementation causes RuntimeWarning due to overflow! The reason for this is discussed in § \ref{sec:numpy2}.
+
+\subsection{Testing the algorithm - NumPy implementation}
+
+To test this implementation I wrote a unittest that verified that a small grid of $c$ close to $0+0i$ did not diverge, and that a much larger grid including some non-members did show some divergent pixels. I also compared the plot output with similar figures produced by other implementations to visually check that it is generating an approximation to the Mandelbrot set.
+
+\section{Profiling the code}\label{sec:profiling}
+
+I timed both algorithms and found that the vectorized NumPy implementation is faster, as expected: for a grid of $5000\times5000$ numbers $c$ and a threshold of $N_\mathrm{max}=50$, the simple implementation takes 132.1 seconds to produce a plot of the Mandelbrot set, while the vectorized NumPy implementation takes 48.7 seconds.\\
+
+Can we improve on the speed of the vectorized code? The sensible approach to such an optimization problem is to profile the code. Python offers several ways of doing this, including the iPython `timeit' magic command that can time individual functions, and even graphical representations such as RunSnakeRun. I find the line profiler \emph{kernprof} very useful here - as well as giving information on how long each function call takes, \emph{kernprof} also tells us how long each individual line in a function takes to execute, allowing us to quickly identify the slow lines. The drawback is that \emph{kernprof} itself adds some overhead, making it unsuitable for benchmarking.\\
+
+I ran the line profiler \emph{kernprof} on my NumPy implementation of the Mandelbrot algorithm, and it produced the following output (edited for width and to remove unused lines):
+
+\begin{verbatim}
+
+
+Total time: 1.1129 s
+File: almondbread.py
+Function: mandelcheck_vector at line 34
+
+Line Hits Time   PerHit %Time Line Contents
+==============================================================
+34                           @profile
+35                           def mandelcheck_vector(threshold,carr):
+36  1     1791   1791.0  0.2      zn=np.zeros_like(carr,dtype=np.complex_)
+37  1      977    977.0  0.1      iters=np.zeros_like(carr,dtype=int)
+38  1      520    520.0  0.0      iters[:,:]=threshold
+39 51       84      1.6  0.0      for i in range(threshold):
+40 50   184630   3692.6 16.6          abstest=np.absolute(zn)
+41 50   251051   5021.0 22.6          iters[np.where(abstest > 2)] = i
+42 50   261089   5221.8 23.5          carr[np.where(abstest > 2)] = 0+0*1j
+43 50   412753   8255.1 37.1          zn = np.square(zn)+carr
+44  1        1      1.0  0.0      return iters
+
+Total time: 0.028532 s
+File: almondbread.py
+Function: setup_complex_arr at line 46
+
+Line Hits Time   PerHit %Time Line Contents
+==============================================================
+46                           @profile
+47                           def setup_complex_arr(reco,imco):
+53  1    11938  11938.0 41.8     reals,imaginaries = np.meshgrid(reco, imco)
+54  1    16594  16594.0 58.2     return reals+1j*imaginaries
+
+Total time: 1.65233 s
+File: almondbread.py
+Function: almondbread at line 64
+
+Line Hits Time   PerHit %Time Line Contents
+==============================================================
+64                             @profile
+65                             def almondbread(nreal,nimag,
+                                   threshold=50,rerange=[-2,1],
+                                   imrange=[-1.5,1.5],imp="naive"):
+66                                           
+67  1       45      45.0  0.0      reco=np.linspace(rerange[0],rerange[1],nreal)
+68  1       20      20.0  0.0      imco=np.linspace(imrange[0],imrange[1],nimag)
+69  1    29523   29523.0  1.8      carr=setup_complex_arr(reco,imco)
+70                                    
+71  1        1       1.0  0.0      if imp == "naive":
+.................
+77                                            
+78  1        1       1.0  0.0      elif imp == "numpy":
+79  1  1114843 1114843.0 67.5          iters=mandelcheck_vector(threshold,carr)
+80  1        1       1.0  0.0          filename="mandel_vector.pdf"
+
+85  1        2      2.0   0.0      imextent=rerange+imrange
+86  1   144391 144391.0   8.7      show_image(iters,imextent,threshold)
+87  1   363505 363505.0  22.0      plt.savefig(filename)
+\end{verbatim}
+
+Start by looking at the function call to \emph{almondbread()}, lines 64 and onwards. This function calls the two other profiled functions, and then calls the plotting code. I note that the function \emph{mandelcheck\_vector()} takes up 67.5\% of the total running time. The remainder of the running time is mostly due to the function \emph{show\_image()} which prepares the plot (22.0\% of running time), and the pyplot function \emph{plt.savefig()} (8.7\% of running time), neither of which I have any idea how to optimize. The running time to set up the complex array is negligible.\\
+
+Examining now the function \emph{mandelcheck\_vector()}, I note that the running time is divided up roughly evenly between the four lines in the loop over $i$. The most demanding line is line 43, which is the vectorized implementation of Equation \ref{eq:mandelbrot_step}. This is a good place to start thinking about optimizations!
+
+\subsection{Additional optimization of NumPy implementation}\label{sec:numpy2}
+
+As described above, the function \emph{mandelcheck\_vector} is taking up most of the processing time in the NumPy implememtation. While the individual lines of code could perhaps be optimized by rewriting in, e.g., C or Fortran, I avoided this approach (largely because I'm not familiar with those languages!) Instead, I considered whether the code could be further optimized within the NumPy framework.\\
+
+One issue with this piece of code is that it continues to iterate Equation \ref{eq:mandelbrot_step} on all array elements $z_n$, even those elements which have already reached $|z_n|>2$ and which therefore are definitely not members of the Mandelbrot set. This also causes overflow errors as these elements diverge towards infinite complex magnitude; these errors do not cause the function to break, but indicate that we are wasting time and memory in the implementation described in § \ref{sec:numpy}. I therefore rewrote the function \emph{mandelcheck\_vector()} to remove the already-divergent array elements from the working array. The rewritten function is included as \emph{mandelcheck\_optimized()}. The code is a little longer and more complicated than the previous implementation, as it is necessary to keep track of the coordinates of each array index - there is probably a smarter way to do this but I couldn't figure one out!\\
+
+The above optimization sped up the code somewhat: for a grid of $5000\times5000$ numbers $c$ and a threshold of $N_\mathrm{max}=50$, the original NumPy implementation (function \emph{mandeltest\_vector()}) took around 50 seconds, while the optimized code takes around 19 seconds. The optimized function has the added cosmetic advantage of not producing any runtime errors due to overflow.
+
+\section{Other optimization strategies}\label{sec:multithread}
+
+Alternative implementations include: rewriting the numerically taxing and/or repetitive parts of the code in C (which can be done in a semi-automated fashion with, e.g., Cython), and utilizing multiprocessing. Here I experiment with making the code parallel using the \emph{multiprocessing} package.\\
+
+My strategy for doing this is very basic: take the desired grid over the complex plane $c$ and break it up into slices with equal numbers of array elements in each slice, so that a dedicated process can run the Mandelbrot algorithm on each slice. The images output by each instance of the Mandelbrot algorithm are then joined together to produce the final output image. This strategy is a little stupid, given our prior knowledge of the Mandelbrot set along with the previous round of optimization: we could in principle divide up the space so that the central regions (that never diverge, and therefore run through all iterations up to $n_\mathrm{max}$ have smaller slices than the outer regions (which diverge early). However, let's say we were trying out a new iterative rule instead of the Mandelbrot rule: we wouldn't know how best to slice it, and it would make sense to do it evenly (or perhaps it would be better to use roughly equal-sized slices but distributed randomly over the grid). I have therefore not attempted to optimize slice size.\\
+
+I choose to base the multiprocessing implementation on the 'optimized NumPy' single-thread code (as described in § \ref{sec:numpy2}), as this is the fastest single-thread implementation I have written. Therefore, the time to compare with is 17.9 seconds. I use the \emph{Pool} functionality from the \emph{multiprocessing} package to split the workload over several processes.\\ 
+
+I am working on a 4-core CPU with hyperthreading; I experimented with 2, 4 and 8 processes. Running over 2 cores is actually slower on my machine compared to the single-core implementation (27 seconds vs. 19 seconds). This may be due to the additional overhead involved in setting up the multiprocess pool? However, utilizing 4 and 8 processes give a modest improvement (15 seconds and 12 seconds, respectively).\\ 
+
+The timing for each implementation of the Mandelbrot algorithm is shown in Table \ref{tab:timing}.
+
+\begin{table}\label{tab:timing}
+	\begin{tabular}{c c}
+		Machine & Macbook Pro, 2.5 GHz Intel Core i7 (4 cores, hyperthreading)\\
+		\hline
+		\textbf{Implementation} & \textbf{Time (seconds)}\\
+		\hline
+		Naive & 135.4 \\
+		NumPy & 50.3 \\
+		NumPy, optimized & 17.9 \\
+		Multiprocess, 2 threads & 23.4 \\
+		Multiprocess, 4 threads & 13.6 \\
+		Multiprocess, 8 threads & 11.4 \\
+		\hline		
+	\end{tabular}
+\end{table}
+
+\end{document}
